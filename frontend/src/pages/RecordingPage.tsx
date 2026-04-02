@@ -16,7 +16,9 @@ export default function RecordingPage() {
   const { upload, uploading, gcsPath } = useGCS();
 
   const handleConnect = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true },
+    });
     setLocalStream(stream);
     await connect(stream);
   };
@@ -24,6 +26,12 @@ export default function RecordingPage() {
   const handleStop = async () => {
     const blob = await stop();
     await upload(blob, role, EPISODE_ID);
+  };
+
+  const handleDisconnect = () => {
+    localStream?.getTracks().forEach((t) => t.stop());
+    setLocalStream(null);
+    disconnect();
   };
 
   useEffect(() => {
@@ -65,7 +73,7 @@ export default function RecordingPage() {
             📞 接続する
           </button>
         ) : (
-          <button onClick={disconnect} style={btn('#f44336')}>
+          <button onClick={handleDisconnect} style={btn('#f44336')}>
             📵 切断する
           </button>
         )}
