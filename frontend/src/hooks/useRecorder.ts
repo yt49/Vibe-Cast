@@ -12,18 +12,23 @@ export function useRecorder() {
     mrRef.current = mr;
 
     mr.ondataavailable = (e) => chunksRef.current.push(e.data);
-    mr.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
-      setAudioUrl(URL.createObjectURL(blob));
-    };
 
     mr.start();
     setRecording(true);
   }, []);
 
-  const stop = useCallback(() => {
-    mrRef.current?.stop();
-    setRecording(false);
+  const stop = useCallback((): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const mr = mrRef.current;
+      if (!mr) return;
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        setAudioUrl(URL.createObjectURL(blob));
+        resolve(blob);
+      };
+      mr.stop();
+      setRecording(false);
+    });
   }, []);
 
   return { start, stop, recording, audioUrl };

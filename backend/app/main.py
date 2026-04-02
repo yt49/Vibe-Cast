@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import signaling
+from app.routers import signaling, audio
 
 app = FastAPI()
 
@@ -12,3 +12,4 @@ app.add_middleware(
 )
 
 app.include_router(signaling.router)
+app.include_router(audio.router)
