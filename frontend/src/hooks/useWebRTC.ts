@@ -11,7 +11,7 @@ export function useWebRTC(roomId: string) {
   const wsRef = useRef<WebSocket | null>(null);
 
   const connect = useCallback(async (localStream: MediaStream) => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/${roomId}`);
+    const ws = new WebSocket(`wss://vibe-cast-backend-905541599300.asia-northeast1.run.app/ws/${roomId}`);
     wsRef.current = ws;
 
     const pc = new RTCPeerConnection(ICE_SERVERS);
