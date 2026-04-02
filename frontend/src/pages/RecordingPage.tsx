@@ -6,9 +6,20 @@ import { useGCS } from '../hooks/useGCS';
 const ROOM_ID = 'vibe-cast-room-1';
 const EPISODE_ID = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
+function formatTime(sec: number) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  return h > 0
+    ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+    : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
 export default function RecordingPage() {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [role, setRole] = useState<'host' | 'guest'>('host');
+  const [elapsed, setElapsed] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const localAudioRef = useRef<HTMLAudioElement>(null);
   const remoteAudioRef = useRef<HTMLAudioElement>(null);
   const { connect, disconnect, connected, remoteStream } = useWebRTC(ROOM_ID);
@@ -23,7 +34,15 @@ export default function RecordingPage() {
     await connect(stream);
   };
 
+  const handleStart = () => {
+    if (!localStream) return;
+    setElapsed(0);
+    start(localStream);
+    timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
+  };
+
   const handleStop = async () => {
+    if (timerRef.current) clearInterval(timerRef.current);
     const blob = await stop();
     await upload(blob, role, EPISODE_ID);
   };
@@ -83,16 +102,21 @@ export default function RecordingPage() {
       <div style={{ marginBottom: 24 }}>
         {!recording ? (
           <button
-            onClick={() => localStream && start(localStream)}
+            onClick={handleStart}
             disabled={!localStream}
             style={btn(localStream ? '#2196F3' : '#ccc')}
           >
             ● 録音開始
           </button>
         ) : (
-          <button onClick={handleStop} style={btn('#FF5722')}>
-            ■ 録音停止 & アップロード
-          </button>
+          <>
+            <div style={{ textAlign: 'center', fontSize: 32, fontVariantNumeric: 'tabular-nums', marginBottom: 12, letterSpacing: 2 }}>
+              🔴 {formatTime(elapsed)}
+            </div>
+            <button onClick={handleStop} style={btn('#FF5722')}>
+              ■ 録音停止 & アップロード
+            </button>
+          </>
         )}
       </div>
 
