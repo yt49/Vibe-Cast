@@ -154,4 +154,7 @@ docker-compose up
 
 ## ライセンス
 
-Private — 個人利用のみ
+$key = "AIzaここに新しいキー"
+[System.Text.Encoding]::UTF8.GetBytes($key) | Set-Content -Path temp_key.bin -Encoding Byte
+gcloud secrets versions add GEMINI_API_KEY --data-file=temp_key.bin --project vibe-cast-tsurudai
+Remove-Item temp_key.bin
