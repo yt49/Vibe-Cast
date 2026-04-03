@@ -4,7 +4,7 @@ const ICE_SERVERS = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
 };
 
-export function useWebRTC(roomId: string) {
+export function useWebRTC(roomId: string, onSessionId?: (id: string) => void) {
   const [connected, setConnected] = useState(false);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -52,9 +52,16 @@ export function useWebRTC(roomId: string) {
         await pc.setRemoteDescription(msg.sdp);
       } else if (msg.type === 'candidate') {
         await pc.addIceCandidate(msg.candidate);
+      } else if (msg.type === 'session_id') {
+        // ホストが録音開始したセッションIDをゲストが受け取る
+        onSessionId?.(msg.id);
       }
     };
-  }, [roomId]);
+  }, [roomId, onSessionId]);
+
+  const sendSessionId = useCallback((id: string) => {
+    wsRef.current?.send(JSON.stringify({ type: 'session_id', id }));
+  }, []);
 
   const disconnect = useCallback(() => {
     pcRef.current?.close();
@@ -63,5 +70,5 @@ export function useWebRTC(roomId: string) {
     setRemoteStream(null);
   }, []);
 
-  return { connect, disconnect, connected, remoteStream };
+  return { connect, disconnect, connected, remoteStream, sendSessionId };
 }
