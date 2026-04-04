@@ -19,7 +19,13 @@ PROMPT_TEMPLATE = """
   "agreed": "二人が合意したこと",
   "disagreed": "まだ対立していること",
   "host_question": "鶴岡が次回までに考えたい問い",
-  "guest_question": "大悟が次回までに考えたい問い"
+  "guest_question": "大悟が次回までに考えたい問い",
+  "journey": {{
+    "departure": "最初に話し始めたこと",
+    "wandering": ["途中で寄り道したトピック（複数可。話が発散していれば多めに）"],
+    "landing": "最終的に二人が辿り着いた場所・結論",
+    "unresolved": "次回に持ち越したモヤモヤや問い"
+  }}
 }}
 """
 

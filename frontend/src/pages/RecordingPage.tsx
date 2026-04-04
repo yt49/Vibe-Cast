@@ -64,7 +64,7 @@ export default function RecordingPage() {
   const [transcribing, setTranscribing] = useState(false);
   const [transcript, setTranscript] = useState<{ host: string | null; guest: string | null } | null>(null);
   const [summarizing, setSummarizing] = useState(false);
-  const [summary, setSummary] = useState<Record<string, string> | null>(null);
+  const [summary, setSummary] = useState<Record<string, string> & { journey?: { departure: string; wandering: string[]; landing: string; unresolved: string } } | null>(null);
 
   // stop/upload を useEffect 内で使うためのref
   const stopRef = useRef(stop);
@@ -352,6 +352,63 @@ export default function RecordingPage() {
                 <p style={{ fontSize: 14, color: C.textSecondary, lineHeight: 1.75, margin: 0 }}>{summary[key]}</p>
               </div>
             ) : null)}
+
+            {/* 思考の旅路 */}
+            {summary.journey && (
+              <div style={{ marginTop: 20, paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
+                <div style={{ fontSize: 11, color: C.textDisabled, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Journey</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {/* 出発点 */}
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: C.primary, marginTop: 4, flexShrink: 0 }} />
+                      <div style={{ width: 1, flex: 1, backgroundColor: C.border, marginTop: 4 }} />
+                    </div>
+                    <div style={{ paddingBottom: 16 }}>
+                      <div style={{ fontSize: 11, color: C.textDisabled, marginBottom: 2 }}>出発点</div>
+                      <p style={{ fontSize: 14, color: C.textSecondary, margin: 0, lineHeight: 1.6 }}>{summary.journey.departure}</p>
+                    </div>
+                  </div>
+                  {/* 寄り道 */}
+                  {(summary.journey.wandering ?? []).map((w: string, i: number) => (
+                    <div key={i} style={{ display: 'flex', gap: 12 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: C.border, marginTop: 5, flexShrink: 0 }} />
+                        <div style={{ width: 1, flex: 1, backgroundColor: C.border, marginTop: 4 }} />
+                      </div>
+                      <div style={{ paddingBottom: 14 }}>
+                        <p style={{ fontSize: 13, color: C.textTertiary, margin: 0, lineHeight: 1.6 }}>{w}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {/* 着地点 */}
+                  {summary.journey.landing && (
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: C.green, marginTop: 4, flexShrink: 0 }} />
+                        {summary.journey.unresolved && <div style={{ width: 1, flex: 1, backgroundColor: C.border, marginTop: 4 }} />}
+                      </div>
+                      <div style={{ paddingBottom: summary.journey.unresolved ? 16 : 0 }}>
+                        <div style={{ fontSize: 11, color: C.textDisabled, marginBottom: 2 }}>着地点</div>
+                        <p style={{ fontSize: 14, color: C.textSecondary, margin: 0, lineHeight: 1.6 }}>{summary.journey.landing}</p>
+                      </div>
+                    </div>
+                  )}
+                  {/* 持ち越し */}
+                  {summary.journey.unresolved && (
+                    <div style={{ display: 'flex', gap: 12 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: C.yellow, marginTop: 4, flexShrink: 0 }} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: C.textDisabled, marginBottom: 2 }}>持ち越し</div>
+                        <p style={{ fontSize: 14, color: C.textSecondary, margin: 0, lineHeight: 1.6 }}>{summary.journey.unresolved}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
