@@ -50,3 +50,7 @@ temp/
 # Google Cloud 認証情報
 gcloud/
 application_default_credentials.json
+
+# 作業ログ（プライベートな内容）
+作業ログ/Vol0_開発秘話.md
+作業ログ/Vol0.1_妄想展開.md

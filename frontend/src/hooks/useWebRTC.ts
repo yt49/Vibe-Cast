@@ -25,7 +25,7 @@ export function useWebRTC(
 
   const connect = useCallback(async (localStream: MediaStream, role: 'host' | 'guest') => {
     const ws = new WebSocket(
-      `wss://vibe-cast-backend-905541599300.asia-northeast1.run.app/ws/${roomId}`
+      `${import.meta.env.VITE_BACKEND_URL.replace(/^http/, 'ws')}/ws/${roomId}`
     );
     wsRef.current = ws;
 

@@ -149,7 +149,7 @@ export default function RecordingPage() {
   const handleTranscribe = async () => {
     setTranscribing(true);
     try {
-      const res = await fetch('https://vibe-cast-backend-905541599300.asia-northeast1.run.app/ai/transcribe', {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/ai/transcribe`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ episode_id: episodeId }),
       });
@@ -162,7 +162,7 @@ export default function RecordingPage() {
     if (!transcript) return;
     setSummarizing(true);
     try {
-      const res = await fetch('https://vibe-cast-backend-905541599300.asia-northeast1.run.app/ai/summarize', {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/ai/summarize`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ host: transcript.host, guest: transcript.guest }),
       });

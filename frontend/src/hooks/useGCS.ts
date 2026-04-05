@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-const BACKEND_URL = 'https://vibe-cast-backend-905541599300.asia-northeast1.run.app';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string;
 
 export function useGCS() {
   const [uploading, setUploading] = useState(false);
