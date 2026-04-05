@@ -1,0 +1,56 @@
+# Claude Code 設定（個人情報含む）
+.claude/
+
+# 環境変数・シークレット
+.env
+*.pem
+*.key
+service-account.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+*.egg
+.pytest_cache/
+
+# Node / フロントエンド
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# エディタ
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ログ・一時ファイル
+*.log
+tmp/
+temp/
+
+# 音声・動画ファイル（大容量のため除外）
+*.webm
+*.mp3
+*.wav
+*.mp4
+*.m4a
+
+# Google Cloud 認証情報
+gcloud/
+application_default_credentials.json
+
+# 作業ログ（プライベートな内容）
+作業ログ/Vol0_開発秘話.md
+作業ログ/Vol0.1_妄想展開.md
