@@ -28,7 +28,9 @@ function mixStreams(local: MediaStream, remote: MediaStream | null): MediaStream
 }
 
 function generateEpisodeId() {
-  return new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '');
+  // JST (UTC+9) で生成
+  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  return now.toISOString().slice(0, 19).replace(/[-T:]/g, '');
 }
 function formatTime(sec: number) {
   const m = Math.floor(sec / 60), s = sec % 60;
@@ -61,6 +63,9 @@ export default function RecordingPage() {
   const { start, stop, recording, audioUrl } = useRecorder();
   const { upload, uploading, gcsPath } = useGCS();
   const { volume, start: startVolume, stop: stopVolume } = useVolumeLevel();
+  const [episodeName, setEpisodeName] = useState('');
+  const [savingName, setSavingName] = useState(false);
+  const [nameSaved, setNameSaved] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [transcript, setTranscript] = useState<{ host: string | null; guest: string | null } | null>(null);
   const [summarizing, setSummarizing] = useState(false);
@@ -158,13 +163,25 @@ export default function RecordingPage() {
     } finally { setTranscribing(false); }
   };
 
+  const handleSaveName = async () => {
+    if (!episodeName.trim() || !episodeId) return;
+    setSavingName(true);
+    try {
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/episodes/${episodeId}/meta`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: episodeName.trim() }),
+      });
+      setNameSaved(true);
+    } finally { setSavingName(false); }
+  };
+
   const handleSummarize = async () => {
     if (!transcript) return;
     setSummarizing(true);
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/ai/summarize`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ host: transcript.host, guest: transcript.guest }),
+        body: JSON.stringify({ episode_id: episodeId, host: transcript.host, guest: transcript.guest }),
       });
       const data = await res.json();
       setSummary(data);
@@ -186,7 +203,7 @@ export default function RecordingPage() {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', fontFamily: font, color: C.textPrimary }}>
-      <div style={{ maxWidth: 420, margin: '0 auto', padding: '48px 24px 80px' }}>
+      <div style={{ maxWidth: 420, margin: '0 auto', padding: '48px 24px 120px' }}>
 
         <header style={{ marginBottom: 40 }}>
           <h1 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em', margin: 0 }}>vibe-cast</h1>
@@ -293,9 +310,28 @@ export default function RecordingPage() {
           </div>
         )}
         {gcsPath && !uploading && (
-          <div style={{ padding: '14px 20px', backgroundColor: C.surface, borderRadius: 12, borderLeft: `3px solid ${C.green}`, marginBottom: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: C.green, marginBottom: 4 }}>アップロード完了</div>
-            <div style={{ fontSize: 11, color: C.textDisabled, fontFamily: 'monospace', wordBreak: 'break-all' }}>{gcsPath}</div>
+          <div style={{ padding: '16px 20px', backgroundColor: C.surface, borderRadius: 12, borderLeft: `3px solid ${C.green}`, marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: C.green, marginBottom: 8 }}>アップロード完了</div>
+            {nameSaved ? (
+              <div style={{ fontSize: 13, color: C.textSecondary }}>{episodeName}</div>
+            ) : (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  value={episodeName}
+                  onChange={(e) => setEpisodeName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+                  placeholder="エピソード名を入力..."
+                  style={{ flex: 1, background: C.surfaceHigh, border: `1px solid ${C.border}`, borderRadius: 8, padding: '8px 12px', fontSize: 13, color: C.textPrimary, fontFamily: font, outline: 'none' }}
+                />
+                <button
+                  onClick={handleSaveName}
+                  disabled={savingName || !episodeName.trim()}
+                  style={{ padding: '8px 14px', borderRadius: 8, backgroundColor: episodeName.trim() ? C.primary : C.surfaceHigh, color: episodeName.trim() ? C.onPrimary : C.textDisabled, border: 'none', fontSize: 13, fontWeight: 600, fontFamily: font, cursor: episodeName.trim() ? 'pointer' : 'default' }}
+                >
+                  {savingName ? '...' : '保存'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
