@@ -21,7 +21,9 @@ export default function App() {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', backgroundColor: C.bg }}>
-      {tab === 'record' ? <RecordingPage /> : <HistoryPage />}
+      {/* タブコンテンツ: display切替でアンマウントさせず録音を継続 */}
+      <div style={{ display: tab === 'record' ? 'block' : 'none' }}><RecordingPage /></div>
+      <div style={{ display: tab === 'history' ? 'block' : 'none' }}><HistoryPage /></div>
 
       {/* ボトムタブバー */}
       <nav style={{
